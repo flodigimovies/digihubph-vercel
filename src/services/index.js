@@ -1,4 +1,4 @@
-export { login, register, logout } from "./authService";
-export { getUser, getUserOrders, createOrder, getLatestOrder } from "./dataService";
+export { login, register, logout, updateProfile, deleteAccount, resendEmailConfirmation } from "./authService";
+export { getUser, getUserOrders, createOrder, getLatestOrder, getOrderStatusById, getOwnedStreamUrl, getOwnedStreamUrlsMap, toStreamUrl } from "./dataService";
 
 export { getProductList, getProduct, getFeaturedList, getFeaturedVideoList, getFeaturedMusicList } from "./productService";

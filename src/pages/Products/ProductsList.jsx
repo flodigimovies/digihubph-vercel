@@ -11,9 +11,13 @@ import { ProductsListSkeleton } from "../../components/Elements/Skeleton";
 const ITEMS_PER_PAGE = 8;
 
 const TABS = [
-  { key: "movie",  label: "Movies", icon: "bi-film" },
-  { key: "video",  label: "Videos", icon: "bi-play-circle" },
-  { key: "music",  label: "Music",  icon: "bi-music-note-beamed" },
+  { key: "movie",    label: "Movies",    icon: "bi-film" },
+  { key: "video",    label: "Videos",    icon: "bi-play-circle" },
+  { key: "music",    label: "Music",     icon: "bi-music-note-beamed" },
+  // Covers templates, tutorials, documents, etc. — all share type "all_files";
+  // `category` (e.g. "Template" / "Tutorial" / "Document") distinguishes
+  // them within the tab.
+  { key: "all_files", label: "All Files",  icon: "bi-file-earmark-richtext" },
 ];
 
 const getPageNumbers = (currentPage, totalPages) => {
@@ -39,6 +43,7 @@ export const ProductsList = () => {
       try {
         const data = await getProductList(searchTerm);
         initialProductList(data);
+        setCurrentPage(1);
       } catch (error) {
         toast.error(error.message, { closeButton: true, position: "bottom-center" });
       } finally {
@@ -48,8 +53,6 @@ export const ProductsList = () => {
     fetchProducts();
   }, [searchTerm]); //eslint-disable-line
 
-  useEffect(() => { setCurrentPage(1); }, [activeTab, products.length]);
-
   const tabProducts = products.filter((p) => p.type === activeTab);
   const totalPages = Math.ceil(tabProducts.length / ITEMS_PER_PAGE);
   const paginated = tabProducts.slice(
@@ -58,7 +61,7 @@ export const ProductsList = () => {
   );
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
-  const tabLabel = { movie: "movies", video: "videos", music: "albums" }[activeTab];
+  const tabLabel = { movie: "movies", video: "videos", music: "albums", all_files: "files" }[activeTab];
 
   return (
     <main className="max-w-screen-xl mx-auto px-4 py-6">
@@ -66,10 +69,10 @@ export const ProductsList = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {searchTerm ? `Results for "${searchTerm}"` : "All Media"}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-base text-gray-500 dark:text-white">
             {loading ? (
               <span className="inline-block h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             ) : (
@@ -86,24 +89,24 @@ export const ProductsList = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-0.5 sm:gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
         {TABS.map((tab) => {
           const count = products.filter((p) => p.type === tab.key).length;
           return (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px
+              onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
+              className={`flex-1 sm:flex-none min-w-0 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 px-1 sm:px-4 py-2.5 text-xs sm:text-lg font-medium border-b-2 transition-colors -mb-px
                 ${activeTab === tab.key
-                  ? "border-red-600 text-red-600 dark:text-red-500 dark:border-red-500"
-                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  ? "border-red-400 text-red-400 dark:text-red-300 dark:border-red-300"
+                  : "border-transparent text-black hover:text-gray-700 dark:text-white dark:hover:text-gray-200"
                 }`}
             >
-              <i className={`bi ${tab.icon}`}></i>
-              {tab.label}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold
+              <i className={`bi ${tab.icon} hidden sm:inline`}></i>
+              <span className="truncate">{tab.label}</span>
+              <span className={`text-[10px] sm:text-sm px-1 sm:px-2 py-0.5 rounded-full font-semibold flex-shrink-0
                 ${activeTab === tab.key
-                  ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400"
+                  ? "bg-red-50 text-red-400 dark:bg-red-900/40 dark:text-red-300"
                   : "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                 }`}>
                 {loading ? "…" : count}

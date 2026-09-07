@@ -3,13 +3,39 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "../../../context";
 import { createOrder, getUser } from "../../../services";
+import { supabase } from "../../../services/supabaseClient";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const GUEST_EMAIL = import.meta.env.VITE_GUEST_LOGIN;
 
-export const Checkout = ({ setCheckout }) => {
-  const { cartList, total, clearCart } = useCart();
-  const [user, setUser] = useState(null); // null = still loading
+const ModalShell = ({ onClose, children }) => (
+  <section>
+    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-40"></div>
+    <div className="mt-5 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full justify-center items-center flex" aria-modal="true" role="dialog">
+      <div className="relative p-4 w-full max-w-md h-full md:h-auto overflow-y-auto">
+        <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <button
+            onClick={onClose}
+            type="button"
+            className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+          >
+            <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path>
+            </svg>
+            <span className="sr-only">Close modal</span>
+          </button>
+          {children}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+export const Checkout = ({ setCheckout, existingOrder = null }) => {
+  const { cartList: cartCartList, total: cartTotal } = useCart();
+  const cartList = existingOrder ? existingOrder.cart_list : cartCartList;
+  const total = existingOrder ? existingOrder.amount_paid : cartTotal;
+  const [user, setUser] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -34,19 +60,27 @@ export const Checkout = ({ setCheckout }) => {
     }
     setLoading(true);
     try {
-      const order = await createOrder(cartList, total, user);
+      const order = existingOrder || (await createOrder(cartList, total, user));
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("Your session has expired. Please log in again.");
+      }
 
       const response = await fetch(`${SUPABASE_URL}/functions/v1/paymongo-payment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
-          amount: total,
-          description: `Digital Movies Order #${order.id}`,
+          order_id: order.id,
           payment_method: selectedMethod,
           success_url: `${window.location.origin}/order-summary`,
           cancel_url: `${window.location.origin}/cart`,
-          name: user.name,
-          email: user.email,
         }),
       });
 
@@ -56,7 +90,6 @@ export const Checkout = ({ setCheckout }) => {
       const checkoutUrl = result?.data?.attributes?.checkout_url;
 
       if (checkoutUrl) {
-        clearCart();
         window.location.href = checkoutUrl;
       } else {
         const errorMsg = result?.errors?.[0]?.detail || result?.error || "Failed to create checkout session";
@@ -71,40 +104,12 @@ export const Checkout = ({ setCheckout }) => {
   }
 
   const paymentMethods = [
-    { id: "gcash",    label: "GCash",                               icon: "bi bi-wallet2",     color: "bg-blue-500"   },
-    { id: "paymaya",  label: "Maya",                                icon: "bi bi-phone",        color: "bg-green-500"  },
-    { id: "card",     label: "Credit / Debit Card",                 icon: "bi bi-credit-card",  color: "bg-gray-700"   },
     { id: "qrph",     label: "QR Ph (GCash, Maya, BPI, BDO +30 more)", icon: "bi bi-qr-code", color: "bg-orange-500" },
   ];
 
-  // ─── Modal shell (shared by all states) ──────────────────────────────────────
-  const ModalShell = ({ children }) => (
-    <section>
-      <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-40"></div>
-      <div className="mt-5 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full justify-center items-center flex" aria-modal="true" role="dialog">
-        <div className="relative p-4 w-full max-w-md h-full md:h-auto overflow-y-auto">
-          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <button
-              onClick={() => setCheckout(false)}
-              type="button"
-              className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
-            >
-              <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path>
-              </svg>
-              <span className="sr-only">Close modal</span>
-            </button>
-            {children}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-
-  // ─── Still loading user ───────────────────────────────────────────────────────
   if (!user) {
     return (
-      <ModalShell>
+      <ModalShell onClose={() => setCheckout(false)}>
         <div className="py-10 px-6 text-center text-gray-400 dark:text-gray-300">
           <i className="bi bi-hourglass-split text-3xl animate-pulse"></i>
           <p className="mt-3 text-sm">Loading...</p>
@@ -113,10 +118,9 @@ export const Checkout = ({ setCheckout }) => {
     );
   }
 
-  // ─── Guest user — block checkout ──────────────────────────────────────────────
   if (user.email === GUEST_EMAIL) {
     return (
-      <ModalShell>
+      <ModalShell onClose={() => setCheckout(false)}>
         <div className="py-8 px-6 text-center">
           <div className="mb-4">
             <i className="bi bi-person-lock text-5xl text-yellow-500"></i>
@@ -152,9 +156,8 @@ export const Checkout = ({ setCheckout }) => {
     );
   }
 
-  // ─── Normal checkout ──────────────────────────────────────────────────────────
   return (
-    <ModalShell>
+    <ModalShell onClose={() => setCheckout(false)}>
       <div className="py-6 px-6 lg:px-8">
         <h3 className="mb-2 text-xl font-medium text-gray-900 dark:text-white">
           <i className="bi bi-bag-check mr-2"></i>CHECKOUT
@@ -162,7 +165,7 @@ export const Checkout = ({ setCheckout }) => {
 
         <div className="mb-4 text-sm text-gray-500 dark:text-gray-300">
           <p>Name: <span className="font-medium text-gray-900 dark:text-white">{user.name}</span></p>
-          <p>Email: <span className="font-medium text-gray-900 dark:text-white">{user.email}</span></p>
+          <p>{user.email ? "Email" : "Mobile"}: <span className="font-medium text-gray-900 dark:text-white">{user.email || user.phone}</span></p>
         </div>
 
         <p className="mb-4 text-2xl font-semibold text-lime-500 text-center">
@@ -192,6 +195,73 @@ export const Checkout = ({ setCheckout }) => {
             </button>
           ))}
         </div>
+
+        {selectedMethod === "qrph" && (
+          <div className="mb-6 p-4 rounded-lg bg-orange-50 border border-orange-200 dark:bg-gray-800 dark:border-gray-600">
+            <p className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-3">
+              <i className="bi bi-info-circle mr-1"></i>
+              Paano Magbayad gamit ang QR Ph / How to Pay via QR Ph
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-xs text-gray-700 dark:text-gray-300">
+              <li>
+                <span className="font-medium">Pindutin ang "PAY NOW" sa ibaba.</span>
+                <br />
+                Click "PAY NOW" below.
+              </li>
+              <li>
+                <span className="font-medium">Ide-redirect ka sa secure na payment page ng PayMongo.</span>
+                <br />
+                You'll be redirected to PayMongo's secure payment page.
+              </li>
+              <li>
+                <span className="font-medium">
+                  I-download ang QR code (o i-screenshot ito) gamit ang
+                  "Download QR Code" button doon.
+                </span>
+                <br />
+                Download the QR code shown there (or take a screenshot) using
+                the "Download QR Code" button.
+              </li>
+              <li>
+                <span className="font-medium">
+                  Buksan ang iyong GCash, Maya, o banking app sa phone mo.
+                </span>
+                <br />
+                Open your GCash, Maya, or banking app on your phone.
+              </li>
+              <li>
+                <span className="font-medium">
+                  Pindutin ang "Scan QR" sa app, pagkatapos i-upload o
+                  i-scan ang na-download na QR code.
+                </span>
+                <br />
+                Tap "Scan QR" in the app, then upload or scan the downloaded
+                QR code image.
+              </li>
+              <li>
+                <span className="font-medium">
+                  Suriin ang halaga (amount) at kumpirmahin ang bayad.
+                </span>
+                <br />
+                Check the amount and confirm the payment.
+              </li>
+              <li>
+                <span className="font-medium">
+                  Bumalik sa Digihub tab — awtomatikong mag-uupdate ang
+                  status ng order mo pagkatapos magbayad.
+                </span>
+                <br />
+                Return to the Digihub tab — your order status will update
+                automatically once payment is confirmed.
+              </li>
+            </ol>
+            <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-400 italic">
+              Tip: Huwag isara ang browser tab habang naghihintay ng
+              kumpirmasyon. / Tip: Don't close the browser tab while waiting
+              for confirmation.
+            </p>
+          </div>
+        )}
 
         <button
           onClick={handlePayment}
