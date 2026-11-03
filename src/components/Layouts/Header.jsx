@@ -80,9 +80,9 @@ export const Header = () => {
                   className="text-sm sm:text-4xl font-bold truncate max-w-[100px] sm:max-w-none"
                   style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
                 >
-                  {/* <span className="text-[#FB651E]">Digi</span>
+                  <span className="text-[#FB651E]">Digi</span>
                   <span className="text-gray-900 dark:text-gray-100">hub</span>
-                  <span className="text-[#FB651E]">PH</span> */}
+                  <span className="text-[#FB651E]">PH</span>
                 </span>
               </Link>
             </div>
