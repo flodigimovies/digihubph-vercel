@@ -5,6 +5,7 @@ import { useOwnedStreamUrl } from "../../context";
 import { Rating } from "./Rating";
 import { VideoPlayerModal } from "./VideoPlayerModal";
 import { toStreamUrl } from "../../services";
+import { useLanguage } from "../../i18n";
 
 // Poster is the primary preview trigger: click it to watch the trailer if
 // one exists, otherwise it just behaves like a normal link to the product
@@ -33,10 +34,13 @@ export const ProductCard = ({ product, compact = false }) => {
   const { cartList, addToCart, removeFromCart } = useCart();
   const [nowPlaying, setNowPlaying] = useState(null); // { name, url } | null
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { id, name, overview, poster, price, rating, best_seller, trailer_url, type } = product;
-  // Watch Online / Preview are a movie-only feature — Videos and Music keep
-  // the plain Add/Remove flow, nothing else changes for them.
+  // Watch Online is a movie-only feature. Preview is shown for Videos,
+  // Music and All Documents (always visible, disabled until a trailer_url
+  // preview link is set on the product), and for movies that have a trailer.
   const isMovie = type === "movie";
+  const isPreviewType = type === "video" || type === "music" || type === "all_files";
   // Only set if the current visitor has a CONFIRMED paid order for this
   // product — never a guess from cart state. See OwnershipContext.
   const ownedStreamUrl = useOwnedStreamUrl(id);
@@ -57,10 +61,15 @@ export const ProductCard = ({ product, compact = false }) => {
 
   function handlePreview(e) {
     e.preventDefault();
-    setNowPlaying({ name: `${name} — Preview`, url: toStreamUrl(trailer_url) });
+    if (!trailer_url) return;
+    setNowPlaying({ name: `${name} — ${t("card.previewSuffix")}`, url: toStreamUrl(trailer_url) });
   }
 
-  const hasTrailer = isMovie && !!trailer_url;
+  // Preview works for every product type that has a preview URL set
+  // (movie trailer, video clip, music sample, file/template preview).
+  const hasTrailer = !!trailer_url;
+  const showPreview = isPreviewType || (isMovie && hasTrailer);
+  const previewIcon = type === "music" ? "bi-music-note-beamed" : type === "all_files" ? "bi-eye" : "bi-film";
 
   // Compact card for Featured section
   if (compact) {
@@ -102,22 +111,26 @@ export const ProductCard = ({ product, compact = false }) => {
               Preview shows above it. */}
           <div className="mt-auto">
             {/* Preview + Watch Online — movies only. */}
-            {isMovie && (
+            {(showPreview || isMovie) && (
               <div className="flex flex-col gap-1 mb-1">
-                {trailer_url && (
+                {showPreview && (
                   <button
                     onClick={handlePreview}
-                    className="w-full text-[11px] bg-slate-600 hover:bg-slate-700 text-white font-medium px-1 py-1 rounded-full transition-colors truncate"
+                    disabled={!hasTrailer}
+                    title={hasTrailer ? undefined : t("card.previewSoon")}
+                    className="w-full text-[11px] bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-medium px-1 py-1 rounded-full transition-colors truncate"
                   >
-                    <i className="bi bi-film mr-0.5"></i>Preview
+                    <i className={`bi ${previewIcon} mr-0.5`}></i>{t("card.preview")}
                   </button>
                 )}
-                <button
-                  onClick={handleWatchOnline}
-                  className="w-full text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-medium px-1 py-1 rounded-full transition-colors truncate"
-                >
-                  <i className="bi bi-play-fill mr-0.5"></i>Watch Online
-                </button>
+                {isMovie && (
+                  <button
+                    onClick={handleWatchOnline}
+                    className="w-full text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-medium px-1 py-1 rounded-full transition-colors truncate"
+                  >
+                    <i className="bi bi-play-fill mr-0.5"></i>{t("card.watchOnline")}
+                  </button>
+                )}
               </div>
             )}
 
@@ -126,7 +139,7 @@ export const ProductCard = ({ product, compact = false }) => {
                 disabled
                 className="w-full text-sm sm:text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 font-medium px-2 py-1.5 sm:py-1 rounded-full mt-1 cursor-default"
               >
-                <i className="bi bi-check-circle-fill mr-1"></i>Purchased
+                <i className="bi bi-check-circle-fill mr-1"></i>{t("card.purchased")}
               </button>
             ) : !inCart ? (
               <button
@@ -134,14 +147,14 @@ export const ProductCard = ({ product, compact = false }) => {
                 disabled={!product.in_stock}
                 className="w-full text-sm sm:text-xs bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium px-2 py-1.5 sm:py-1 rounded-full transition-colors mt-1"
               >
-                <i className="bi bi-cart-plus mr-1"></i>Add to Cart
+                <i className="bi bi-cart-plus mr-1"></i>{t("card.addToCart")}
               </button>
             ) : (
               <button
                 onClick={() => removeFromCart(product)}
                 className="w-full text-sm sm:text-xs bg-gray-700 hover:bg-gray-800 text-white font-medium px-2 py-1.5 sm:py-1 rounded-full transition-colors mt-1"
               >
-                <i className="bi bi-trash3 mr-1"></i>Remove
+                <i className="bi bi-trash3 mr-1"></i>{t("card.remove")}
               </button>
             )}
           </div>
@@ -158,7 +171,7 @@ export const ProductCard = ({ product, compact = false }) => {
       <PosterWrapper hasTrailer={hasTrailer} onPreview={handlePreview} id={id} name={name} className="relative block overflow-hidden rounded-xl">
         {best_seller && (
           <span className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded">
-            Best Seller
+            {t("card.bestSeller")}
           </span>
         )}
         {hasTrailer && (
@@ -205,22 +218,26 @@ export const ProductCard = ({ product, compact = false }) => {
             Watch Online only shows for movies). */}
         <div className="mt-auto pl-12">
           {/* Preview + Watch Online — movies only. */}
-          {isMovie && (
+          {(showPreview || isMovie) && (
             <div className="flex flex-col gap-1.5 mb-2 max-w-xs">
-              {trailer_url && (
+              {showPreview && (
                 <button
                   onClick={handlePreview}
-                  className="w-full text-xs bg-slate-600 hover:bg-slate-700 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
+                  disabled={!hasTrailer}
+                  title={hasTrailer ? undefined : t("card.previewSoon")}
+                  className="w-full text-xs bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-medium px-3 py-1.5 rounded-full transition-colors"
                 >
-                  <i className="bi bi-film mr-1"></i>Preview
+                  <i className={`bi ${previewIcon} mr-1`}></i>{t("card.preview")}
                 </button>
               )}
-              <button
-                onClick={handleWatchOnline}
-                className="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
-              >
-                <i className="bi bi-play-fill mr-1"></i>Watch Online — ₱{price}
-              </button>
+              {isMovie && (
+                <button
+                  onClick={handleWatchOnline}
+                  className="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
+                >
+                  <i className="bi bi-play-fill mr-1"></i>{t("card.watchOnline")} — ₱{price}
+                </button>
+              )}
             </div>
           )}
 
@@ -230,7 +247,7 @@ export const ProductCard = ({ product, compact = false }) => {
                 disabled
                 className="w-full text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 font-medium px-3 py-1.5 rounded-full cursor-default"
               >
-                <i className="bi bi-check-circle-fill mr-1"></i>Purchased
+                <i className="bi bi-check-circle-fill mr-1"></i>{t("card.purchased")}
               </button>
             ) : !inCart ? (
               <button
@@ -238,14 +255,14 @@ export const ProductCard = ({ product, compact = false }) => {
                 disabled={!product.in_stock}
                 className="w-full text-xs bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
               >
-                <i className="bi bi-cart-plus mr-1"></i>Add to Cart
+                <i className="bi bi-cart-plus mr-1"></i>{t("card.addToCart")}
               </button>
             ) : (
               <button
                 onClick={() => removeFromCart(product)}
                 className="w-full text-xs bg-gray-700 hover:bg-gray-800 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
               >
-                <i className="bi bi-trash3 mr-1"></i>Remove
+                <i className="bi bi-trash3 mr-1"></i>{t("card.remove")}
               </button>
             )}
           </div>

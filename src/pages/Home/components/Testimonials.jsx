@@ -1,32 +1,21 @@
 import { useEffect, useState } from "react";
+import { useLanguage, testimonials as translatedTestimonials } from "../../../i18n";
 
-const testimonials = [
+const people = [
   {
-    title: "Paborito kong movie web app!",
-    quote: "Ang sarap sa pakiramdam na madali lang maghanap at bumili ng content sa DigiHub. Ang ganda ng collection at super affordable pa ng presyo!",
     name: "James Ploy",
-    role: "Regular Customer",
     img: "https://images.unsplash.com/photo-1642060603505-e716140d45d2?auto=format&fit=crop&w=120&h=120&q=60&crop=faces",
   },
   {
-    title: "Perfect talaga para sa movie nights!",
-    quote: "Kami ng pamilya ko, gamit kami ng DigiHub every weekend. Ang dami ding pwedeng piliin na magagandang titles. Highly recommended!",
     name: "Sarah Santos",
-    role: "Stay-at-home Mom",
     img: "https://images.unsplash.com/photo-1513097633097-329a3a64e0d4?auto=format&fit=crop&w=120&h=120&q=60&crop=faces",
   },
   {
-    title: "Sulit na sulit ang pera dito!",
-    quote: "Hindi ko na kailangan magbayad ng monthly fees. Sa DigiHub, bibili lang ako ng gusto ko. Nakakatipid ng malaki!",
     name: "Marco Rivera",
-    role: "College Student",
     img: "https://images.unsplash.com/photo-1552358155-515e264cb8b8?auto=format&fit=crop&w=120&h=120&q=60&crop=faces",
   },
   {
-    title: "Laging up to date!",
-    quote: "Lagi may latest content ang DigiHub. Hindi na ako nakakamiss ng bagong releases. Best digital platform, walang kaduda-duda!",
     name: "Lisa Talor",
-    role: "Office Worker",
     img: "https://images.unsplash.com/photo-1617309644714-89d2ab1c9e19?auto=format&fit=crop&w=120&h=120&q=60&crop=faces",
   },
 ];
@@ -34,6 +23,9 @@ const testimonials = [
 const AUTO_ADVANCE_MS = 5000;
 
 export const Testimonials = () => {
+  const { lang, t: tr } = useLanguage();
+  const texts = translatedTestimonials[lang] ?? translatedTestimonials.en;
+  const testimonials = people.map((p, i) => ({ ...p, ...texts[i] }));
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = testimonials.length;
@@ -52,7 +44,7 @@ export const Testimonials = () => {
 
   return (
     <section className='my-20'>
-      <h1 className="text-2xl text-center font-semibold text-orange-600 dark:text-orange-500 mb-5 underline underline-offset-8">What Our Viewers Say:</h1>
+      <h1 className="text-2xl text-center font-semibold text-orange-600 dark:text-orange-500 mb-5 underline underline-offset-8">{tr("home.testimonials")}</h1>
 
       <div
         className="relative max-w-2xl mx-auto"
@@ -89,7 +81,7 @@ export const Testimonials = () => {
         <button
           type="button"
           onClick={() => goTo(current - 1)}
-          aria-label="Previous testimonial"
+          aria-label={tr("home.prevTestimonial")}
           className="absolute top-1/2 -left-4 -translate-y-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full w-9 h-9 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 shadow-sm"
         >
           <i className="bi bi-chevron-left"></i>
@@ -97,7 +89,7 @@ export const Testimonials = () => {
         <button
           type="button"
           onClick={() => goTo(current + 1)}
-          aria-label="Next testimonial"
+          aria-label={tr("home.nextTestimonial")}
           className="absolute top-1/2 -right-4 -translate-y-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full w-9 h-9 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500 shadow-sm"
         >
           <i className="bi bi-chevron-right"></i>
@@ -110,7 +102,7 @@ export const Testimonials = () => {
               key={t.name}
               type="button"
               onClick={() => goTo(i)}
-              aria-label={`Go to testimonial ${i + 1}`}
+              aria-label={tr("home.goToTestimonial", { n: i + 1 })}
               className={`h-2.5 rounded-full transition-all ${
                 i === current
                   ? "w-6 bg-orange-600 dark:bg-orange-500"

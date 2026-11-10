@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../../../assets/images/digital-movies-logo.png";
+import { useLanguage } from "../../../i18n";
 
 export const Hero = () => {
   const [credential, setCredential] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(!!sessionStorage.getItem("token"));
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     function syncAuthState() {
@@ -37,12 +39,12 @@ export const Hero = () => {
 
         {/* Main Heading */}
         <h1 className="text-5xl font-bold text-center lg:text-left dark:text-slate-100 leading-tight mt-1">
-          Movies, Music, Videos & — More.
+          {t("hero.title")}
         </h1>
 
         {/* Subheading */}
         <p className="text-2xl mt-2 mb-5 lg:my-5 text-center lg:text-left dark:text-slate-100">
-          Download. Play. Watch. — No Ads.
+          {t("hero.subtitle")}
           {/* Download Files. Play Music. Watch Movies. */}
         </p>
 
@@ -50,7 +52,7 @@ export const Hero = () => {
           <>
             {/* CTA label */}
             <p className="text-center lg:text-left text-gray-600 dark:text-gray-200 text-sm mb-3">
-              Enter your email or mobile number to get started.
+              {t("hero.cta")}
             </p>
 
             {/* Input + button */}
@@ -59,7 +61,7 @@ export const Hero = () => {
                 type="text"
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
-                placeholder="Email or 09XXXXXXXXX"
+                placeholder={t("hero.placeholder")}
                 required
                 className="flex-1 px-4 py-3 text-sm rounded-sm border border-gray-300 dark:border-gray-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
               />
@@ -67,7 +69,7 @@ export const Hero = () => {
                 type="submit"
                 className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-base px-6 py-3 rounded-sm transition-colors whitespace-nowrap"
               >
-                Register
+                {t("hero.register")}
                 <span className="bi bi-chevron-right"></span>
               </button>
             </form>
@@ -80,7 +82,7 @@ export const Hero = () => {
             to="/products"
             className="text-white bg-[#FB651E] hover:bg-[#e0570f] focus:ring-4 focus:ring-orange-300 font-semibold rounded-sm text-lg px-8 py-3 mb-1 dark:bg-[#FB651E] dark:hover:bg-[#e0570f] focus:outline-none dark:focus:ring-orange-900 tracking-wide transition-colors"
           >
-            Explore!
+            {t("hero.explore")}
           </Link>
         </div>
 

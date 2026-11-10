@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useTitle } from "../../hooks/useTitle";
+import { useLanguage } from "../../i18n";
 import { getUserOrders } from "../../services";
 import { DashboardCard } from "./components/DashboardCard";
 import { DashboardEmpty } from "./components/DashboardEmpty";
@@ -9,7 +10,8 @@ import { DashboardSkeleton } from "../../components/Elements/Skeleton";
 export const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  useTitle("Dashboard");
+  const { t } = useLanguage();
+  useTitle(t("title.dashboard"));
 
   useEffect(() => {
     async function fetchOrders() {
@@ -33,7 +35,7 @@ export const DashboardPage = () => {
   return (
     <main>
       <section>
-        <p className="text-2xl text-center font-semibold dark:text-slate-100 my-10 underline underline-offset-8">My Dashboard</p>
+        <p className="text-2xl text-center font-semibold dark:text-slate-100 my-10 underline underline-offset-8">{t("dashboard.title")}</p>
       </section>
 
       <section>

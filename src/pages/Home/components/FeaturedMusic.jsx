@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useLanguage } from "../../../i18n";
 import { ProductCard } from "../../../components";
 import { FeaturedRowSkeleton } from "../../../components/Elements/Skeleton";
 import { getFeaturedMusicList } from "../../../services";
 
 export const FeaturedMusic = () => {
+  const { t } = useLanguage();
   const [music, setMusic] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +30,7 @@ export const FeaturedMusic = () => {
   return (
     <section className="my-10">
       <h1 className="text-2xl text-center font-semibold text-orange-600 dark:text-orange-500 mb-5 underline underline-offset-8">
-        Featured Music
+        {t("home.featuredMusic")}
       </h1>
       <div className="flex flex-wrap justify-center gap-3 sm:gap-4 px-4">
         {music.map((album) => (

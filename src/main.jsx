@@ -7,12 +7,14 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import { FilterProvider, CartProvider, OwnershipProvider } from "./context/index.js"
 import { ScrollToTop } from "./components/index.js"
+import { LanguageProvider } from "./i18n"
 import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Router>
+      <LanguageProvider>
       <CartProvider>
         <OwnershipProvider>
           <FilterProvider>
@@ -22,6 +24,7 @@ createRoot(document.getElementById('root')).render(
           </FilterProvider>
         </OwnershipProvider>
       </CartProvider>
+      </LanguageProvider>
     </Router>
   </StrictMode>
 )

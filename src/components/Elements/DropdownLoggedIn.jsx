@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getUser, logout } from "../../services";
+import { useLanguage } from "../../i18n";
 
 export const DropdownLoggedIn = ({ setDropdown }) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [user, setUser] = useState({});
 
   useEffect(() => {
@@ -31,8 +33,8 @@ export const DropdownLoggedIn = ({ setDropdown }) => {
 
   // Show email for email accounts, phone for phone accounts, "Guest" for guests
   const displayName = isGuest
-    ? "Guest"
-    : user.email || user.phone || "Account";
+    ? t("dropdown.guest")
+    : user.email || user.phone || t("dropdown.account");
 
   return (
     <div id="dropdownAvatar" className="select-none absolute top-12 right-0 z-50 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
@@ -50,7 +52,7 @@ export const DropdownLoggedIn = ({ setDropdown }) => {
             to="/products"
             className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
           >
-            All Movies
+            {t("dropdown.allMovies")}
           </Link>
         </li>
         <li>
@@ -59,7 +61,7 @@ export const DropdownLoggedIn = ({ setDropdown }) => {
             to="/dashboard"
             className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
           >
-            Dashboard
+            {t("dropdown.dashboard")}
           </Link>
         </li>
         <li>
@@ -68,7 +70,7 @@ export const DropdownLoggedIn = ({ setDropdown }) => {
             to="/account"
             className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
           >
-            Account Settings
+            {t("dropdown.accountSettings")}
           </Link>
         </li>
       </ul>
@@ -77,7 +79,7 @@ export const DropdownLoggedIn = ({ setDropdown }) => {
           onClick={handleLogout}
           className="cursor-pointer block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
         >
-          Log out
+          {t("dropdown.logout")}
         </span>
       </div>
     </div>

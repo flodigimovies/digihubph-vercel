@@ -3,9 +3,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useTitle } from "../hooks/useTitle";
 import { register } from '../services';
+import { useLanguage } from "../i18n";
 
 export const Register = () => {
-  useTitle("Register");
+  const { t } = useLanguage();
+  useTitle(t("title.register"));
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const prefill = searchParams.get("prefill") || "";
@@ -41,7 +43,7 @@ export const Register = () => {
           <button
             type="button"
             onClick={() => navigate("/")}
-            aria-label="Close"
+            aria-label={t("auth.close")}
             className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <span className="bi bi-x-lg text-xl"></span>
@@ -53,11 +55,11 @@ export const Register = () => {
               <span className="bi bi-person-plus text-3xl text-red-600 dark:text-red-500"></span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Create an account
+              {t("auth.createAccount")}
             </h1>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Join <span className="text-red-600 font-semibold">DigiHub</span> today
+              {t("auth.join")} <span className="text-red-600 font-semibold">DigiHub</span> {t("auth.today")}
             </p>
           </div>
 
@@ -67,7 +69,7 @@ export const Register = () => {
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Full name
+                {t("auth.fullName")}
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 bi bi-person text-gray-400 dark:text-gray-500"></span>
@@ -86,7 +88,7 @@ export const Register = () => {
             {/* Email or Phone — pre-filled from Hero */}
             <div>
               <label htmlFor="emailOrPhone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Email or mobile number
+                {t("auth.emailOrPhone")}
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 bi bi-person-circle text-gray-400 dark:text-gray-500"></span>
@@ -94,7 +96,7 @@ export const Register = () => {
                   type="text"
                   id="emailOrPhone"
                   name="emailOrPhone"
-                  placeholder="you@example.com or 09XXXXXXXXX"
+                  placeholder={t("auth.emailOrPhonePlaceholder")}
                   defaultValue={prefill}
                   required
                   autoComplete="off"
@@ -106,7 +108,7 @@ export const Register = () => {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Password
+                {t("auth.password")}
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 bi bi-lock text-gray-400 dark:text-gray-500"></span>
@@ -114,7 +116,7 @@ export const Register = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  placeholder="Min. 7 characters"
+                  placeholder={t("auth.passwordMin")}
                   required
                   minLength="7"
                   className="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
@@ -122,7 +124,7 @@ export const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
                   <span className={showPassword ? "bi bi-eye-slash" : "bi bi-eye"}></span>
@@ -136,16 +138,16 @@ export const Register = () => {
               className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm py-2.5 rounded-lg transition-colors"
             >
               <span className="bi bi-person-check"></span>
-              Create Account
+              {t("auth.createBtn")}
             </button>
 
           </form>
 
           {/* Login link */}
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-            Already have an account?{" "}
+            {t("auth.haveAccount")}{" "}
             <Link to="/login" className="text-red-600 hover:text-red-700 font-semibold transition-colors">
-              Log In
+              {t("auth.login")}
             </Link>
           </p>
 

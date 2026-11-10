@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom"
 import { useCart } from "../../../context";
+import { useLanguage } from "../../../i18n";
 
 export const CartCard = ({product}) => {
   const { removeFromCart } = useCart();
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-wrap justify-between border-b dark:border-slate-700 max-w-4xl m-auto p-2 mb-5 ">
@@ -14,7 +16,7 @@ export const CartCard = ({product}) => {
             <Link to={`products/${product.id}`}>
               <p className="text-lg ml-2 dark:text-slate-200">{product.name}</p>
             </Link>            
-            <button onClick={() => removeFromCart(product)} className="text-base ml-2 text-red-400">Remove</button>
+            <button onClick={() => removeFromCart(product)} className="text-base ml-2 text-red-400">{t("cart.remove")}</button>
           </div>
       </div>
       <div className="text-lg m-2 dark:text-slate-200">

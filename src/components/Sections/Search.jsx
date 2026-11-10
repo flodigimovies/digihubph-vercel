@@ -1,8 +1,10 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../i18n";
 
 export const Search = ({setSearchSection}) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const searchRef = useRef();
 
   const handleSearch = (event) => {
@@ -27,7 +29,7 @@ export const Search = ({setSearchSection}) => {
                   type="text"
                   id="simple-search"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Search music, movies, videos, tutorials..."
+                  placeholder={t("search.placeholder")}
                   autoComplete="off"
                 />
             </div>

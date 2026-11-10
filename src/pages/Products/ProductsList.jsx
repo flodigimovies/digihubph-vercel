@@ -6,18 +6,19 @@ import { FilterBar } from "./components/FilterBar";
 import { useFilter } from "../../context";
 import { getProductList } from "../../services";
 import { toast } from "react-toastify";
+import { useLanguage } from "../../i18n";
 import { ProductsListSkeleton } from "../../components/Elements/Skeleton";
 
 const ITEMS_PER_PAGE = 8;
 
 const TABS = [
-  { key: "movie",    label: "Movies",    icon: "bi-film" },
-  { key: "video",    label: "Videos",    icon: "bi-play-circle" },
-  { key: "music",    label: "Music",     icon: "bi-music-note-beamed" },
+  { key: "movie",    icon: "bi-film" },
+  { key: "video",    icon: "bi-play-circle" },
+  { key: "music",    icon: "bi-music-note-beamed" },
   // Covers templates, tutorials, documents, etc. — all share type "all_files";
   // `category` (e.g. "Template" / "Tutorial" / "Document") distinguishes
   // them within the tab.
-  { key: "all_files", label: "All Files",  icon: "bi-file-earmark-richtext" },
+  { key: "all_files", icon: "bi-file-earmark-richtext" },
 ];
 
 const getPageNumbers = (currentPage, totalPages) => {
@@ -28,6 +29,7 @@ const getPageNumbers = (currentPage, totalPages) => {
 };
 
 export const ProductsList = () => {
+  const { t } = useLanguage();
   const { products, initialProductList } = useFilter();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export const ProductsList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const search = useLocation().search;
   const searchTerm = new URLSearchParams(search).get("q");
-  useTitle("Explore Collection");
+  useTitle(t("title.explore"));
 
   useEffect(() => {
     async function fetchProducts() {
@@ -61,7 +63,7 @@ export const ProductsList = () => {
   );
   const pageNumbers = getPageNumbers(currentPage, totalPages);
 
-  const tabLabel = { movie: "movies", video: "videos", music: "albums", all_files: "files" }[activeTab];
+  const tabLabel = t(`products.label.${activeTab}`);
 
   return (
     <main className="max-w-screen-xl mx-auto px-4 py-6">
@@ -70,13 +72,13 @@ export const ProductsList = () => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {searchTerm ? `Results for "${searchTerm}"` : "All Media"}
+            {searchTerm ? t("products.results", { term: searchTerm }) : t("products.allMedia")}
           </h1>
           <p className="text-base text-gray-500 dark:text-white">
             {loading ? (
               <span className="inline-block h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             ) : (
-              `${tabProducts.length} ${tabLabel} available`
+              t("products.available", { count: tabProducts.length, label: tabLabel })
             )}
           </p>
         </div>
@@ -84,7 +86,7 @@ export const ProductsList = () => {
           onClick={() => setShow(!show)}
           className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
         >
-          <i className="bi bi-sliders"></i> Filter
+          <i className="bi bi-sliders"></i> {t("products.filter")}
         </button>
       </div>
 
@@ -103,7 +105,7 @@ export const ProductsList = () => {
                 }`}
             >
               <i className={`bi ${tab.icon} hidden sm:inline`}></i>
-              <span className="truncate">{tab.label}</span>
+              <span className="truncate">{t(`products.tab.${tab.key}`)}</span>
               <span className={`text-[10px] sm:text-sm px-1 sm:px-2 py-0.5 rounded-full font-semibold flex-shrink-0
                 ${activeTab === tab.key
                   ? "bg-red-50 text-red-400 dark:bg-red-900/40 dark:text-red-300"
@@ -130,7 +132,7 @@ export const ProductsList = () => {
           {tabProducts.length === 0 && (
             <div className="text-center py-20 text-gray-400 dark:text-gray-500">
               <i className={`bi ${TABS.find(t => t.key === activeTab)?.icon} text-6xl mb-4 block`}></i>
-              <p className="text-lg">No {tabLabel} found</p>
+              <p className="text-lg">{t("products.noneFound", { label: tabLabel })}</p>
             </div>
           )}
 

@@ -4,10 +4,12 @@ import Logo from "../../assets/digital-movies-logo.png";
 import { Search } from "../Sections/Search";
 import { DropdownLoggedOut, DropdownLoggedIn } from "../index";
 import { useCart } from "../../context";
+import { useLanguage } from "../../i18n";
 import { supabase } from "../../services/supabaseClient";
 
 export const Header = () => {
   const { cartList } = useCart();
+  const { lang, toggleLang, t } = useLanguage();
   const [darkMode, setDarkMode] = useState(JSON.parse(localStorage.getItem("darkMode")) ?? true);
   const [searchSection, setSearchSection] = useState(true);
   const [dropdown, setDropdown] = useState(false);
@@ -90,28 +92,39 @@ export const Header = () => {
             {/* Right Side Icons */}
             <div className="flex flex-row items-center gap-1 sm:gap-5 flex-shrink-0 relative">
 
+              {/* Language Toggle (English / Filipino / Japanese) — cycles on click */}
+              <button
+                onClick={toggleLang}
+                title={t("nav.languageTitle")}
+                aria-label={t("nav.languageTitle")}
+                className="flex cursor-pointer flex-col items-center justify-center gap-0.5 w-7 sm:w-16 text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors bg-transparent border-none"
+              >
+                <span className="text-base sm:text-4xl bi bi-translate flex items-center justify-center"></span>
+                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">{{ en: "EN", tl: "FIL", ja: "JA" }[lang] ?? "EN"}</span>
+              </button>
+
               {/* Dark Mode Toggle */}
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                title={darkMode ? "Light Mode" : "Dark Mode"}
+                title={darkMode ? t("nav.darkTitle") : t("nav.lightTitle")}
                 className={`flex cursor-pointer flex-col items-center justify-center gap-0.5 w-7 sm:w-16 text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors bg-transparent border-none`}
               >
                 <span className={`text-base sm:text-4xl flex items-center justify-center ${darkMode ? "bi bi-moon" : "bi bi-sun"}`}></span>
-                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">{darkMode ? "Dark" : "Light"}</span>
+                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">{darkMode ? t("nav.dark") : t("nav.light")}</span>
               </button>
 
               {/* Search */}
               <button
                 onClick={() => setSearchSection(!searchSection)}
-                title="Search"
+                title={t("nav.search")}
                 className={`flex cursor-pointer flex-col items-center justify-center gap-0.5 w-7 sm:w-16 text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors bg-transparent border-none`}
               >
                 <span className="text-base sm:text-4xl bi bi-search flex items-center justify-center"></span>
-                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">Search</span>
+                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">{t("nav.search")}</span>
               </button>
 
               {/* Cart */}
-              <Link to="/cart" title="Cart" className={`flex flex-col items-center justify-center gap-0.5 w-7 sm:w-16 text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors`}>
+              <Link to="/cart" title={t("nav.cart")} className={`flex flex-col items-center justify-center gap-0.5 w-7 sm:w-16 text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors`}>
                 <span className="relative inline-flex items-center justify-center w-5 h-5 sm:w-10 sm:h-10">
                   <span className="text-base sm:text-4xl bi bi-cart-fill"></span>
                   {cartList.length > 0 && (
@@ -120,18 +133,18 @@ export const Header = () => {
                     </span>
                   )}
                 </span>
-                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">Cart</span>
+                <span className="block text-[7px] sm:text-sm leading-none text-center w-full">{t("nav.cart")}</span>
               </Link>
 
               {/* Account */}
               <div ref={dropdownRef} className={`flex relative flex-col items-center justify-center`}>
                 <button
                   onClick={() => setDropdown(!dropdown)}
-                  title="Account"
+                  title={t("nav.account")}
                   className="cursor-pointer flex flex-col items-center justify-center gap-0.5 w-7 sm:w-16 text-black dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors bg-transparent border-none"
                 >
                   <span className="bi bi-person-circle text-base sm:text-4xl flex items-center justify-center text-orange-600 dark:text-orange-400"></span>
-                  <span className="block text-[7px] sm:text-sm leading-none text-center w-full">Account</span>
+                  <span className="block text-[7px] sm:text-sm leading-none text-center w-full">{t("nav.account")}</span>
                 </button>
 
                 {dropdown && (isLoggedIn
@@ -147,7 +160,7 @@ export const Header = () => {
                   className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-colors whitespace-nowrap"
                 >
                   <span className="bi bi-box-arrow-in-right"></span>
-                  <span>Log In</span>
+                  <span>{t("nav.login")}</span>
                 </Link>
               )}
 

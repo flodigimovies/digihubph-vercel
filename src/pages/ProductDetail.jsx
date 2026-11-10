@@ -4,11 +4,13 @@ import { toast } from "react-toastify";
 import { useTitle } from "../hooks/useTitle";
 import { Rating, VideoPlayerModal } from "../components";
 import { useCart } from "../context";
+import { useLanguage } from "../i18n";
 import { getProduct, getOwnedStreamUrl, toStreamUrl } from "../services";
 import { ProductDetailSkeleton } from "../components/Elements/Skeleton";
 
 export const ProductDetail = () => {
   const { cartList, addToCart, removeFromCart } = useCart();
+  const { t } = useLanguage();
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   // Only set once we've CONFIRMED this visitor paid for this exact product —
@@ -84,12 +86,17 @@ export const ProductDetail = () => {
                   cart mutation on their behalf.
                 Buttons stack vertically, same width, capped at max-w-xs. */}
             <p className="my-3 flex flex-col items-stretch gap-2 max-w-xs">
-              {product.type === "movie" && product.trailer_url && (
+              {/* Movies: only when a trailer exists. Videos / Music / All
+                  Documents: always shown, disabled until trailer_url is set. */}
+              {(product.type === "video" || product.type === "music" || product.type === "all_files" ||
+                (product.type === "movie" && product.trailer_url)) && (
                 <button
-                  onClick={() => setNowPlaying({ name: `${product.name} — Preview`, url: toStreamUrl(product.trailer_url) })}
-                  className="inline-flex items-center justify-center py-2 px-4 text-base font-medium text-center text-white bg-slate-600 rounded-lg hover:bg-slate-700"
+                  onClick={() => product.trailer_url && setNowPlaying({ name: `${product.name} — ${t("card.previewSuffix")}`, url: toStreamUrl(product.trailer_url) })}
+                  disabled={!product.trailer_url}
+                  title={product.trailer_url ? undefined : t("card.previewSoon")}
+                  className="inline-flex items-center justify-center py-2 px-4 text-base font-medium text-center text-white bg-slate-600 rounded-lg hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed"
                 >
-                  Preview <i className="ml-2 bi bi-film"></i>
+                  {t("card.preview")} <i className={`ml-2 bi ${product.type === "music" ? "bi-music-note-beamed" : product.type === "all_files" ? "bi-eye" : "bi-film"}`}></i>
                 </button>
               )}
 
