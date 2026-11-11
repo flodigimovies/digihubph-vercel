@@ -97,7 +97,14 @@ supabase functions deploy paymongo-webhook --no-verify-jwt
 supabase functions deploy delete-account
 ```
 
-The webhook skips JWT verification because PayMongo can't send auth headers. It verifies PayMongo's signature instead. In the PayMongo Dashboard (**Developers → Webhooks**), point a webhook at `https://<project-ref>.supabase.co/functions/v1/paymongo-webhook` and subscribe to `checkout_session.payment.paid`.
+### PayMongo webhook
+
+
+<!-- The webhook skips JWT verification because PayMongo can't send auth headers. It verifies PayMongo's signature instead. In the PayMongo Dashboard (**Developers → Webhooks**), point a webhook at `https://<project-ref>.supabase.co/functions/v1/paymongo-webhook` and subscribe to `checkout_session.payment.paid`. -->
+
+In the PayMongo Dashboard (Developers → Webhooks), point a webhook at
+`https://<project-ref>.supabase.co/functions/v1/paymongo-webhook`
+and subscribe to `checkout_session.payment.paid`.
 
 ```bash
 npm run dev       # start dev server
