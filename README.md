@@ -129,4 +129,4 @@ Movies, music, videos, and posters belong to their respective creators and are p
 
 ## Contact
 
-**Flo** (Filomeno Santiago Espiritu): filosantiagoespiritu@outlook.com
+**Flo** (Filo Santiago Espiritu): filosantiagoespiritu@outlook.com
